@@ -1,0 +1,1318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>VERDICT — Business Decision Court</title>
+
+  <style>
+    :root{
+      --bg:#0b0f14;
+      --panel:#121824;
+      --panel2:#0f1520;
+      --border:#1f2a3a;
+      --text:#e6edf3;
+      --muted:#9aa6b2;
+      --soft:#cbd5e1;
+      --red:#ff4d5a;
+      --orange:#f6a623;
+      --green:#2bd576;
+      --cyan:#66d9ff;
+      --shadow: 0 18px 50px rgba(0,0,0,.55);
+      --radius:16px;
+      --radius2:12px;
+      --pad:22px;
+      --gap:16px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      background:
+        radial-gradient(1200px 600px at 30% -10%, rgba(102,217,255,.10), transparent 60%),
+        radial-gradient(1000px 600px at 90% 0%, rgba(43,213,118,.10), transparent 60%),
+        radial-gradient(900px 600px at 50% 110%, rgba(255,77,90,.12), transparent 60%),
+        var(--bg);
+      color:var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      padding: 34px 18px 60px;
+    }
+
+    .container{ max-width: 1100px; margin:0 auto; }
+    .topbar{
+      display:flex; align-items:center; justify-content:space-between;
+      gap:12px; margin-bottom:18px;
+    }
+    .brand{
+      display:flex; align-items:center; gap:12px;
+    }
+    .logo{
+      width:40px; height:40px; border-radius:12px;
+      background: linear-gradient(135deg, rgba(255,77,90,.9), rgba(246,166,35,.7));
+      box-shadow: 0 12px 30px rgba(255,77,90,.18);
+    }
+    .titleblock h1{
+      margin:0; font-size:18px; letter-spacing:.20em;
+    }
+    .titleblock .sub{
+      margin-top:4px; color:var(--muted); font-size:12px;
+    }
+    .meta{
+      display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end;
+      color:var(--muted); font-size:12px;
+    }
+    .chip{
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.03);
+      padding:8px 10px; border-radius:999px;
+      display:flex; gap:8px; align-items:center;
+    }
+    .chip b{ color:var(--soft); font-weight:600; }
+    .mono{ font-family: var(--mono); }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 420px 1fr;
+      gap:18px;
+      align-items:start;
+    }
+    @media (max-width: 980px){
+      .grid{ grid-template-columns:1fr; }
+    }
+
+    .panel{
+      background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.015));
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+
+    .panelHeader{
+      padding: 18px var(--pad);
+      border-bottom:1px solid var(--border);
+      background: rgba(255,255,255,.02);
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+    }
+    .panelHeader .h{
+      display:flex; flex-direction:column; gap:4px;
+    }
+    .panelHeader .h .kicker{
+      font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted);
+    }
+    .panelHeader .h .name{
+      font-size:15px; font-weight:700; letter-spacing:.02em;
+    }
+    .panelBody{ padding: var(--pad); }
+
+    .steps{
+      display:flex; gap:8px; flex-wrap:wrap;
+      align-items:center;
+    }
+    .step{
+      display:flex; gap:8px; align-items:center;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.02);
+      padding:8px 10px; border-radius:999px;
+      color:var(--muted); font-size:12px;
+    }
+    .dot{
+      width:10px; height:10px; border-radius:50%;
+      background: rgba(154,166,178,.35);
+    }
+    .step.active{ color:var(--soft); }
+    .step.active .dot{ background: var(--cyan); }
+    .step.done .dot{ background: var(--green); }
+
+    .fieldGrid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    @media (max-width: 520px){
+      .fieldGrid{ grid-template-columns: 1fr; }
+    }
+
+    label{
+      display:block;
+      font-size:12px;
+      color:var(--muted);
+      margin: 0 0 6px;
+    }
+    input, select, textarea{
+      width:100%;
+      padding:12px 12px;
+      border-radius:12px;
+      border:1px solid var(--border);
+      background: rgba(10,14,20,.8);
+      color:var(--text);
+      outline:none;
+    }
+    textarea{ min-height: 88px; resize: vertical; }
+    input::placeholder, textarea::placeholder{ color: rgba(154,166,178,.55); }
+
+    .help{
+      margin-top:6px;
+      font-size:11px;
+      color: rgba(154,166,178,.75);
+      line-height:1.35;
+    }
+
+    .row{
+      display:flex; gap:12px; align-items:center; flex-wrap:wrap;
+    }
+    .btnRow{
+      display:flex; gap:10px; margin-top:16px; flex-wrap:wrap;
+    }
+    button{
+      border:none; cursor:pointer;
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-weight:700;
+      letter-spacing:.02em;
+    }
+    .btnPrimary{
+      background: linear-gradient(135deg, rgba(255,77,90,.95), rgba(246,166,35,.85));
+      color:#0b0f14;
+    }
+    .btnGhost{
+      background: rgba(255,255,255,.03);
+      border:1px solid var(--border);
+      color: var(--soft);
+    }
+    .btnDanger{
+      background: rgba(255,77,90,.15);
+      border:1px solid rgba(255,77,90,.35);
+      color: var(--soft);
+    }
+    .btnPrimary:disabled{
+      opacity:.45; cursor:not-allowed;
+    }
+
+    .warnBox{
+      border: 1px solid rgba(246,166,35,.35);
+      background: rgba(246,166,35,.08);
+      padding:12px 12px;
+      border-radius: 12px;
+      color: rgba(230,237,243,.92);
+      font-size:12px;
+      line-height:1.35;
+    }
+    .errBox{
+      border: 1px solid rgba(255,77,90,.35);
+      background: rgba(255,77,90,.08);
+      padding:12px 12px;
+      border-radius: 12px;
+      color: rgba(230,237,243,.92);
+      font-size:12px;
+      line-height:1.35;
+    }
+    .okBox{
+      border: 1px solid rgba(43,213,118,.35);
+      background: rgba(43,213,118,.08);
+      padding:12px 12px;
+      border-radius: 12px;
+      color: rgba(230,237,243,.92);
+      font-size:12px;
+      line-height:1.35;
+    }
+
+    /* Right side report */
+    .reportTop{
+      display:grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap: 18px;
+    }
+    @media (max-width: 980px){
+      .reportTop{ grid-template-columns:1fr; }
+    }
+    .bigScore{
+      display:flex; flex-direction:column; gap:10px;
+    }
+    .scoreNum{
+      font-size: 58px;
+      font-weight: 900;
+      letter-spacing: -.02em;
+      line-height:1;
+    }
+    .scoreLine{
+      height:10px;
+      background: rgba(255,255,255,.05);
+      border:1px solid var(--border);
+      border-radius:999px;
+      overflow:hidden;
+    }
+    .scoreFill{
+      height:100%;
+      width:0%;
+      background: linear-gradient(90deg, var(--red), var(--orange), var(--green));
+      border-radius:999px;
+      transition: width .6s ease;
+    }
+    .verdictBadge{
+      display:inline-flex; align-items:center; gap:10px;
+      border:1px solid var(--border);
+      border-radius: 999px;
+      padding:10px 12px;
+      width: fit-content;
+      background: rgba(255,255,255,.03);
+    }
+    .pill{
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size:12px;
+      font-weight:800;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+    }
+    .pill.red{ background: rgba(255,77,90,.15); border:1px solid rgba(255,77,90,.35); color: var(--soft); }
+    .pill.orange{ background: rgba(246,166,35,.14); border:1px solid rgba(246,166,35,.33); color: var(--soft); }
+    .pill.green{ background: rgba(43,213,118,.14); border:1px solid rgba(43,213,118,.33); color: var(--soft); }
+
+    .dims{
+      display:flex; flex-direction:column; gap:10px;
+    }
+    .dim{
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.02);
+      border-radius: 12px;
+      padding: 10px 12px;
+    }
+    .dim .label{ color: var(--muted); font-size:12px; }
+    .dim .val{ font-family: var(--mono); font-size:12px; color: var(--soft); }
+
+    .section{
+      margin-top:18px;
+    }
+    .section h3{
+      margin:0 0 10px;
+      font-size:13px;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      color: var(--muted);
+    }
+    .list{
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.02);
+      border-radius: 14px;
+      padding: 12px 14px;
+    }
+    .list ul{ margin:0; padding-left:18px; }
+    .list li{ margin: 7px 0; color: rgba(230,237,243,.92); }
+
+    .rankItem{
+      display:flex; gap:10px; align-items:flex-start;
+      padding:10px 10px;
+      border-radius: 12px;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.02);
+      margin: 10px 0;
+    }
+    .rankTag{
+      font-size:11px;
+      letter-spacing:.10em;
+      font-weight:900;
+      text-transform:uppercase;
+      padding: 7px 10px;
+      border-radius: 999px;
+      white-space:nowrap;
+      border:1px solid transparent;
+    }
+    .rankTag.critical{ background: rgba(255,77,90,.15); border-color: rgba(255,77,90,.35); }
+    .rankTag.major{ background: rgba(246,166,35,.14); border-color: rgba(246,166,35,.33); }
+    .rankTag.moderate{ background: rgba(102,217,255,.10); border-color: rgba(102,217,255,.25); }
+    .rankBody b{ display:block; margin-bottom:3px; }
+    .rankBody .why{ color: rgba(154,166,178,.85); font-size:12px; line-height:1.35; }
+
+    .split2{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:18px;
+    }
+    @media (max-width: 980px){
+      .split2{ grid-template-columns: 1fr; }
+    }
+    .pathBox{
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.02);
+      border-radius: 14px;
+      padding: 14px 14px;
+    }
+    .pathBox .t{
+      display:flex; align-items:center; justify-content:space-between;
+      color: var(--soft);
+      font-weight:800;
+      letter-spacing:.06em;
+      text-transform:uppercase;
+      font-size:12px;
+      margin-bottom:8px;
+    }
+    .pathBox p{
+      margin:0;
+      color: rgba(154,166,178,.92);
+      line-height:1.45;
+      font-size:13px;
+    }
+    .dominant{
+      margin-top:10px;
+      display:inline-flex;
+      gap:10px;
+      align-items:center;
+      border-radius: 999px;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.03);
+      padding: 8px 10px;
+      color: var(--soft);
+      font-size:12px;
+      width: fit-content;
+    }
+
+    .killBox{
+      border: 1px solid rgba(255,77,90,.35);
+      background: rgba(255,77,90,.06);
+      border-radius: 16px;
+      padding: 14px 14px;
+    }
+    .killGrid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    @media (max-width: 980px){
+      .killGrid{ grid-template-columns:1fr; }
+    }
+    .killMetric{
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.02);
+      border-radius: 14px;
+      padding: 12px 12px;
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:center;
+    }
+    .killMetric .m{
+      color: var(--muted);
+      font-size:12px;
+    }
+    .killMetric .v{
+      font-family: var(--mono);
+      font-size:12px;
+      color: var(--soft);
+      white-space:nowrap;
+    }
+
+    .footerBtns{
+      display:flex; gap:10px; flex-wrap:wrap; margin-top:14px;
+    }
+
+    .small{
+      font-size:12px;
+      color: rgba(154,166,178,.85);
+      line-height:1.35;
+    }
+
+    .hidePrint{ display:block; }
+    @media print{
+      body{ background:white; color:#111827; padding:0; }
+      .panel, .chip, .btnRow, .hidePrint, .topbar{ box-shadow:none; }
+      .panel{ border:1px solid #e5e7eb; }
+      .chip{ border:1px solid #e5e7eb; background:#fff; color:#111827; }
+      .panelHeader{ background:#fff; border-bottom:1px solid #e5e7eb; }
+      .panelBody{ background:#fff; }
+      .scoreFill{ background:#111827; }
+      .pill.red, .pill.orange, .pill.green{ border:1px solid #e5e7eb; background:#fff; color:#111827; }
+      .rankTag{ border:1px solid #e5e7eb; background:#fff; color:#111827; }
+      .killBox{ border:1px solid #e5e7eb; background:#fff; }
+      .pathBox{ border:1px solid #e5e7eb; background:#fff; }
+      .list, .rankItem, .dim, .killMetric{ border:1px solid #e5e7eb; background:#fff; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+
+    <div class="topbar">
+      <div class="brand">
+        <div class="logo"></div>
+        <div class="titleblock">
+          <h1>VERDICT</h1>
+          <div class="sub">Business Decision Court — operational reality only</div>
+        </div>
+      </div>
+
+      <div class="meta">
+        <div class="chip"><span>CASE</span> <b class="mono" id="caseId">—</b></div>
+        <div class="chip"><span>TIME</span> <b class="mono" id="caseTime">—</b></div>
+        <div class="chip"><span>DATA</span> <b id="dataConfidence">—</b></div>
+      </div>
+    </div>
+
+    <div class="grid">
+
+      <!-- LEFT: Intake -->
+      <div class="panel">
+        <div class="panelHeader">
+          <div class="h">
+            <div class="kicker">Case Filing</div>
+            <div class="name">Operational Submission (12 required facts)</div>
+          </div>
+          <div class="steps">
+            <div class="step active" id="s1"><span class="dot"></span> Intake</div>
+            <div class="step" id="s2"><span class="dot"></span> Validate</div>
+            <div class="step" id="s3"><span class="dot"></span> Ruling</div>
+          </div>
+        </div>
+        <div class="panelBody">
+
+          <div class="row" style="margin-bottom:12px;">
+            <div style="flex:1;">
+              <label>Evidence quality (affects confidence)</label>
+              <select id="evidenceTier">
+                <option value="A">Tier A — Verified exports (bank/processor/accounting)</option>
+                <option value="B">Tier B — Secondary proof (invoices/contracts/POS screenshots)</option>
+                <option value="C" selected>Tier C — Manual entry (unverified)</option>
+              </select>
+              <div class="help">No AI. No backend. This V1 simulates confidence rules and structural logic.</div>
+            </div>
+          </div>
+
+          <div class="fieldGrid">
+            <div>
+              <label>1) Monthly revenue (USD)</label>
+              <input id="monthlyRevenue" inputmode="decimal" placeholder="e.g., 8000">
+            </div>
+            <div>
+              <label>2) Monthly net profit (USD)</label>
+              <input id="monthlyProfit" inputmode="decimal" placeholder="e.g., 1200">
+            </div>
+
+            <div>
+              <label>3) Fixed monthly costs (USD)</label>
+              <input id="fixedCosts" inputmode="decimal" placeholder="e.g., 3500">
+            </div>
+            <div>
+              <label>4) Variable cost per sale (USD)</label>
+              <input id="variableCost" inputmode="decimal" placeholder="e.g., 12">
+            </div>
+
+            <div>
+              <label>5) Customers per month</label>
+              <input id="customersPerMonth" inputmode="numeric" placeholder="e.g., 220">
+            </div>
+            <div>
+              <label>6) Repeat customer rate (%)</label>
+              <input id="repeatRate" inputmode="decimal" placeholder="e.g., 25">
+            </div>
+
+            <div>
+              <label>7) Primary acquisition channel</label>
+              <input id="acquisitionChannel" placeholder="e.g., referrals / ads / walk-in">
+            </div>
+            <div>
+              <label>8) Founder hours per week</label>
+              <input id="founderHours" inputmode="numeric" placeholder="e.g., 55">
+            </div>
+
+            <div>
+              <label>9) Months operating</label>
+              <input id="monthsOperating" inputmode="numeric" placeholder="e.g., 10">
+            </div>
+            <div>
+              <label>10) Primary operational dependency</label>
+              <input id="dependency" placeholder="e.g., one supplier / one platform / founder only">
+            </div>
+
+            <div>
+              <label>11) Revenue last month (USD)</label>
+              <input id="rev1" inputmode="decimal" placeholder="e.g., 8200">
+            </div>
+            <div>
+              <label>12) Revenue 2 months ago (USD)</label>
+              <input id="rev2" inputmode="decimal" placeholder="e.g., 7800">
+            </div>
+          </div>
+
+          <div style="margin-top:12px;">
+            <label>Revenue 3 months ago (USD) — used for trend</label>
+            <input id="rev3" inputmode="decimal" placeholder="e.g., 7400">
+          </div>
+
+          <div style="margin-top:12px;">
+            <label>Notes (optional)</label>
+            <textarea id="notes" placeholder="Optional context. Verdict does not evaluate ideas. Keep it factual."></textarea>
+          </div>
+
+          <div class="btnRow">
+            <button class="btnPrimary" id="btnAnalyze">ISSUE VERDICT</button>
+            <button class="btnGhost" onclick="fillDemo()">LOAD DEMO</button>
+            <button class="btnDanger" onclick="resetAll()">RESET</button>
+          </div>
+
+          <div style="margin-top:14px;" id="intakeMsg"></div>
+
+          <div class="hidePrint small" style="margin-top:14px;">
+            Print: use your browser print dialog after a ruling (it formats cleanly).
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Report -->
+      <div class="panel">
+        <div class="panelHeader">
+          <div class="h">
+            <div class="kicker">Ruling</div>
+            <div class="name">Verdict Report</div>
+          </div>
+          <div class="steps">
+            <div class="step" id="r1"><span class="dot"></span> Score</div>
+            <div class="step" id="r2"><span class="dot"></span> Structure</div>
+            <div class="step" id="r3"><span class="dot"></span> Kill Test</div>
+          </div>
+        </div>
+
+        <div class="panelBody">
+          <div id="emptyState" class="warnBox">
+            No ruling issued yet. File a case and issue a verdict. If required data is missing or inconsistent, Verdict refuses analysis or reduces confidence.
+          </div>
+
+          <div id="report" class="hidden">
+            <div class="reportTop">
+              <div class="bigScore">
+                <div class="section h3block">
+                  <h3>Objective Health Score</h3>
+                  <div class="scoreNum" id="scoreNum">—</div>
+                  <div class="scoreLine"><div class="scoreFill" id="scoreFill"></div></div>
+                  <div class="small" id="scoreMeta">—</div>
+                </div>
+
+                <div class="verdictBadge">
+                  <div class="pill red" id="verdictPill">TERMINATE</div>
+                  <div class="small" id="verdictWhy">—</div>
+                </div>
+              </div>
+
+              <div class="dims">
+                <h3>Dimensional Breakdown</h3>
+                <div class="dim"><div class="label">Revenue Reality</div><div class="val" id="dRevenue">—</div></div>
+                <div class="dim"><div class="label">Cost Discipline</div><div class="val" id="dCost">—</div></div>
+                <div class="dim"><div class="label">Operational Consistency</div><div class="val" id="dOps">—</div></div>
+                <div class="dim"><div class="label">Customer Proof</div><div class="val" id="dCustomer">—</div></div>
+                <div class="dim"><div class="label">Time-to-Break-Even Logic</div><div class="val" id="dBreakeven">—</div></div>
+              </div>
+            </div>
+
+            <div class="section">
+              <h3>Structural Status</h3>
+              <div class="list">
+                <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;">
+                  <div id="structStatus">—<</div>
+                  <div class="small mono" id="structRule">—</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="section split2">
+              <div>
+                <h3>Critical Failures (ranked)</h3>
+                <div id="criticalFailures"></div>
+              </div>
+              <div>
+                <h3>Strength Signals</h3>
+                <div class="list" id="strengthSignals"></div>
+              </div>
+            </div>
+
+            <div class="section">
+              <h3>Asymmetric Outcome Paths</h3>
+              <div class="split2">
+                <div class="pathBox">
+                  <div class="t"><span>Baseline Decay Path</span><span class="mono" id="baselineProb">—</span></div>
+                  <p id="baselineText">—</p>
+                </div>
+                <div class="pathBox">
+                  <div class="t"><span>Best-Case Recovery Path</span><span class="mono" id="bestcaseProb">—</span></div>
+                  <p id="bestcaseText">—</p>
+                </div>
+              </div>
+              <div class="dominant" id="dominantOutcome">—</div>
+            </div>
+
+            <div class="section">
+              <h3>Time-Boxed Kill Test</h3>
+              <div class="killBox">
+                <div class="small" style="margin-bottom:10px;" id="killWindow">—</div>
+                <div class="killGrid" id="killMetrics"></div>
+                <div class="footerBtns hidePrint">
+                  <button class="btnGhost" onclick="window.print()">PRINT VERDICT RECORD</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="section">
+              <h3>Verdict Ruling (canonical)</h3>
+              <div class="list">
+                <b id="canonicalRuling">—</b>
+                <div class="small" id="canonicalNote" style="margin-top:6px;">—</div>
+              </div>
+            </div>
+
+          </div> <!-- report -->
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+<script>
+  // ---------- Utilities ----------
+  function n(x){ return Number(String(x).replace(/[$, ]/g,"")); }
+  function isNum(v){ return Number.isFinite(v); }
+  function clamp(v,min,max){ return Math.max(min, Math.min(max,v)); }
+  function pct(v){ return (Math.round(v*100)) + "%"; }
+  function money(v){
+    if(!Number.isFinite(v)) return "—";
+    return "$" + Math.round(v).toLocaleString();
+  }
+  function nowStamp(){
+    const d = new Date();
+    return d.toLocaleString();
+  }
+  function makeCaseId(){
+    const s = Math.random().toString(36).slice(2,7).toUpperCase();
+    const t = Date.now().toString(36).slice(-5).toUpperCase();
+    return "V-" + s + "-" + t;
+  }
+
+  // ---------- State ----------
+  const state = {
+    caseId: makeCaseId(),
+    time: nowStamp(),
+    dataConfidence: "LOW",
+  };
+
+  document.getElementById("caseId").textContent = state.caseId;
+  document.getElementById("caseTime").textContent = state.time;
+  setConfidence("C"); // default
+
+  function setConfidence(tier){
+    let label = "LOW";
+    if(tier === "A") label = "HIGH";
+    if(tier === "B") label = "MEDIUM";
+    if(tier === "C") label = "LOW";
+    state.dataConfidence = label;
+    document.getElementById("dataConfidence").textContent = label;
+  }
+
+  document.getElementById("evidenceTier").addEventListener("change", (e)=>{
+    setConfidence(e.target.value);
+  });
+
+  // ---------- Steps UI ----------
+  function setStep(step){
+    // left
+    const s1 = document.getElementById("s1");
+    const s2 = document.getElementById("s2");
+    const s3 = document.getElementById("s3");
+    [s1,s2,s3].forEach(x=>x.classList.remove("active","done"));
+    if(step === 1){ s1.classList.add("active"); }
+    if(step === 2){ s1.classList.add("done"); s2.classList.add("active"); }
+    if(step === 3){ s1.classList.add("done"); s2.classList.add("done"); s3.classList.add("active"); }
+
+    // right
+    const r1 = document.getElementById("r1");
+    const r2 = document.getElementById("r2");
+    const r3 = document.getElementById("r3");
+    [r1,r2,r3].forEach(x=>x.classList.remove("active","done"));
+    if(step === 1){ r1.classList.add("active"); }
+    if(step === 2){ r1.classList.add("done"); r2.classList.add("active"); }
+    if(step === 3){ r1.classList.add("done"); r2.classList.add("done"); r3.classList.add("active"); }
+  }
+  setStep(1);
+
+  // ---------- Core: Validation ----------
+  function validateInputs(payload){
+    const errors = [];
+    const warnings = [];
+
+    // Required numeric fields
+    const requiredNums = [
+      ["monthlyRevenue","Monthly revenue"],
+      ["monthlyProfit","Monthly net profit"],
+      ["fixedCosts","Fixed monthly costs"],
+      ["variableCost","Variable cost per sale"],
+      ["customersPerMonth","Customers per month"],
+      ["repeatRate","Repeat customer rate (%)"],
+      ["founderHours","Founder hours per week"],
+      ["monthsOperating","Months operating"],
+      ["rev1","Revenue last month"],
+      ["rev2","Revenue 2 months ago"],
+      ["rev3","Revenue 3 months ago"],
+    ];
+
+    for(const [k,label] of requiredNums){
+      if(!isNum(payload[k])) errors.push(`${label} is missing or not a number.`);
+      if(isNum(payload[k]) && payload[k] < 0) errors.push(`${label} cannot be negative.`);
+    }
+
+    // Required text fields
+    if(!payload.acquisitionChannel || payload.acquisitionChannel.trim().length < 2){
+      errors.push("Primary acquisition channel is missing.");
+    }
+    if(!payload.dependency || payload.dependency.trim().length < 2){
+      errors.push("Primary operational dependency is missing.");
+    }
+
+    // Plausibility checks
+    if(isNum(payload.repeatRate) && (payload.repeatRate < 0 || payload.repeatRate > 100)){
+      errors.push("Repeat customer rate must be between 0 and 100.");
+    }
+    if(isNum(payload.founderHours) && payload.founderHours > 120){
+      warnings.push("Founder hours > 120/wk is likely incorrect. Confirm entry.");
+    }
+    if(isNum(payload.customersPerMonth) && payload.customersPerMonth > 200000){
+      warnings.push("Customer count extremely high. Confirm entry.");
+    }
+
+    // Internal consistency checks
+    if(isNum(payload.monthlyRevenue) && isNum(payload.fixedCosts) && payload.monthlyRevenue === 0 && payload.fixedCosts > 0){
+      warnings.push("Revenue is 0 but fixed costs are > 0 (cash burn).");
+    }
+    if(isNum(payload.monthlyRevenue) && isNum(payload.monthlyProfit)){
+      // Profit greater than revenue is impossible (unless revenue is net and profit is something else)
+      if(payload.monthlyProfit > payload.monthlyRevenue){
+        warnings.push("Profit > revenue. This is usually impossible. Confirm definitions.");
+      }
+    }
+
+    // Trend checks: ensure rev1, rev2, rev3 not wildly conflicting with monthlyRevenue
+    if(isNum(payload.monthlyRevenue) && isNum(payload.rev1)){
+      const diff = Math.abs(payload.monthlyRevenue - payload.rev1);
+      if(payload.monthlyRevenue > 0 && (diff / payload.monthlyRevenue) > 0.6){
+        warnings.push("Monthly revenue differs a lot from 'Revenue last month'. Confirm consistency.");
+      }
+    }
+
+    return {errors, warnings};
+  }
+
+  // ---------- Core: Scoring ----------
+  function scoreVerdict(payload, tier){
+    // Dimensions max points:
+    // Revenue Reality 25
+    // Cost Discipline 20
+    // Operational Consistency 20
+    // Customer Proof 15
+    // Time-to-Breakeven Logic 20
+    // Total 100
+
+    const dims = {
+      revenue: 0,
+      cost: 0,
+      ops: 0,
+      customer: 0,
+      breakeven: 0
+    };
+
+    const failures = []; // ranked later
+    const strengths = [];
+
+    const R = payload.monthlyRevenue;
+    const P = payload.monthlyProfit;
+    const F = payload.fixedCosts;
+    const V = payload.variableCost;
+    const C = payload.customersPerMonth;
+    const RR = payload.repeatRate;
+    const H = payload.founderHours;
+    const M = payload.monthsOperating;
+    const r1 = payload.rev1, r2 = payload.rev2, r3 = payload.rev3;
+
+    // Derived metrics
+    const profitMargin = (R > 0) ? (P / R) : (P > 0 ? 1 : -1);
+    const revenueTrend = (r3 > 0) ? ((r1 - r3) / r3) : (r1 > r2 ? 0.2 : -0.2); // rough if r3=0
+    const avgRev3 = (r1 + r2 + r3) / 3;
+    const revenueVolatility = (avgRev3 > 0) ? (Math.max(r1,r2,r3) - Math.min(r1,r2,r3)) / avgRev3 : 1;
+
+    // Approx contribution margin (rough): assume avg price = revenue/customers, CM = (price - variableCost)/price
+    const priceApprox = (C > 0) ? (R / C) : 0;
+    const contribMargin = (priceApprox > 0) ? ((priceApprox - V) / priceApprox) : 0;
+    const breakevenRevenue = (contribMargin > 0) ? (F / contribMargin) : Infinity;
+
+    // ---- Revenue Reality (0-25)
+    if(R >= 20000){ dims.revenue = 25; strengths.push("Revenue reality: strong."); }
+    else if(R >= 10000){ dims.revenue = 20; strengths.push("Revenue reality: viable."); }
+    else if(R >= 5000){ dims.revenue = 14; strengths.push("Revenue reality: moderate."); }
+    else if(R >= 2000){ dims.revenue = 8; failures.push(fail("Moderate","Revenue below viability threshold","Revenue is too low to support a stable operating model without major changes.")); }
+    else{ dims.revenue = 3; failures.push(fail("Critical","Revenue collapse","Revenue is near floor-level. Continuation is structurally weak unless verified demand scales immediately.")); }
+
+    // ---- Cost Discipline (0-20) using profit margin & fixed cost burden
+    if(R > 0){
+      const fixedRatio = F / R;
+      if(profitMargin >= 0.20 && fixedRatio <= 0.45){ dims.cost = 20; strengths.push("Cost discipline: strong margins."); }
+      else if(profitMargin >= 0.10 && fixedRatio <= 0.60){ dims.cost = 14; strengths.push("Cost discipline: acceptable."); }
+      else if(profitMargin >= 0.00 && fixedRatio <= 0.75){ dims.cost = 8; failures.push(fail("Major","Cost pressure","Costs are consuming too much revenue; margins are fragile.")); }
+      else{ dims.cost = 2; failures.push(fail("Critical","Unsustainable cost structure","Costs and/or margin profile imply structural loss risk.")); }
+    } else {
+      dims.cost = 0;
+      failures.push(fail("Critical","No revenue base for costs","With revenue at zero/near-zero, cost discipline cannot exist."));
+    }
+
+    // ---- Operational Consistency (0-20): months + volatility + founder hours
+    // months operating
+    let ops = 0;
+    if(M >= 24) ops += 8;
+    else if(M >= 12) ops += 6;
+    else if(M >= 6) ops += 3;
+    else ops += 1;
+
+    // volatility
+    if(revenueVolatility <= 0.20) ops += 7;
+    else if(revenueVolatility <= 0.45) ops += 4;
+    else ops += 1;
+
+    // founder hours dependency (not exact but signals stability)
+    if(H <= 40) ops += 5;
+    else if(H <= 60) ops += 3;
+    else ops += 1;
+
+    dims.ops = clamp(ops,0,20);
+
+    if(H > 70) failures.push(fail("Major","Founder dependency risk","Operations require extreme founder labor; scaling and sustainability are impaired."));
+    if(M < 3) failures.push(fail("Moderate","Insufficient operating history","Too early for stable structural inference; treat as preliminary.")); // still allowed, but flagged
+
+    // ---- Customer Proof (0-15): customers, repeat rate, channel clarity
+    let cust = 0;
+    if(C >= 500) cust += 6;
+    else if(C >= 150) cust += 4;
+    else if(C >= 50) cust += 2;
+    else cust += 1;
+
+    if(RR >= 35) cust += 6;
+    else if(RR >= 20) cust += 4;
+    else if(RR >= 10) cust += 2;
+    else cust += 1;
+
+    // channel present (already required) but reward specificity
+    const ch = payload.acquisitionChannel.toLowerCase();
+    if(ch.includes("ref") || ch.includes("organic") || ch.includes("seo") || ch.includes("walk") || ch.includes("repeat")){
+      cust += 3;
+    } else {
+      cust += 2;
+    }
+    dims.customer = clamp(cust,0,15);
+
+    if(RR < 10) failures.push(fail("Moderate","Weak customer retention","Repeat rate is low; demand may be unstable or product-market fit is weak."));
+    if(C < 25) failures.push(fail("Moderate","Low customer volume","Customer count is too low to support reliable revenue conclusions."));
+
+    // ---- Time-to-Breakeven Logic (0-20): contribution margin + breakeven revenue vs current revenue
+    let be = 0;
+    if(!Number.isFinite(breakevenRevenue)){
+      be = 0;
+      failures.push(fail("Critical","Break-even impossible","Contribution margin appears non-positive. The model cannot break even without changing unit economics."));
+    } else {
+      // contribution margin scoring
+      if(contribMargin >= 0.60) be += 10;
+      else if(contribMargin >= 0.40) be += 8;
+      else if(contribMargin >= 0.25) be += 5;
+      else be += 2;
+
+      // compare current revenue to breakeven
+      if(R >= breakevenRevenue) be += 10;
+      else if(R >= 0.75 * breakevenRevenue) be += 7;
+      else if(R >= 0.50 * breakevenRevenue) be += 4;
+      else be += 1;
+    }
+    dims.breakeven = clamp(be,0,20);
+
+    if(breakevenRevenue !== Infinity && R < 0.5 * breakevenRevenue){
+      failures.push(fail("Major","Far from break-even","Revenue is far below break-even requirement. Time and capital risk are high."));
+    }
+
+    // ---- Confidence adjustment (not changing total score, but reported)
+    // Tier A = High, B = Medium, C = Low; also reduce confidence if many warnings/failures severe
+    // We'll compute confidence later.
+
+    const total = dims.revenue + dims.cost + dims.ops + dims.customer + dims.breakeven;
+
+    // ---- Structural status (hard triggers)
+    let structural = { status: "Salvageable", rule: "No terminal triggers fired." };
+
+    // Terminal triggers
+    // 1) Negative profit AND low revenue
+    if(P < 0 && R < 3000){
+      structural = { status: "Terminal by Design", rule: "Trigger: loss + low revenue floor." };
+      failures.unshift(fail("Critical","Terminal trigger fired","Operating at a loss with low revenue. Continuation is statistically dominated by decay without model change."));
+    }
+
+    // 2) Contribution margin <= 0 (break-even impossible)
+    if(contribMargin <= 0){
+      structural = { status: "Terminal by Design", rule: "Trigger: non-positive contribution margin." };
+    }
+
+    // 3) Downtrend + high costs
+    if(revenueTrend < -0.15 && (R > 0 && (F/R) > 0.70)){
+      structural = { status: "Terminal by Design", rule: "Trigger: declining revenue + heavy fixed cost burden." };
+      failures.unshift(fail("Critical","Terminal trigger fired","Demand decline with heavy fixed costs produces rapid cash depletion."));
+    }
+
+    // ---- Canonical ruling
+    // exactly one of:
+    // Rational to Continue
+    // Continue Only With Corrections
+    // Irrational to Continue
+    // Terminate
+    let ruling = "Terminate";
+    let rulingPill = "red";
+    let rulingWhy = "Structural risk dominates the continuation decision.";
+
+    if(structural.status === "Terminal by Design"){
+      ruling = "Terminate";
+      rulingPill = "red";
+      rulingWhy = "Terminal triggers indicate model-level failure unless the core structure changes.";
+    } else {
+      if(total >= 78){
+        ruling = "Rational to Continue";
+        rulingPill = "green";
+        rulingWhy = "Execution reality is strong; continuation is rational under current structure.";
+      } else if(total >= 58){
+        ruling = "Continue Only With Corrections";
+        rulingPill = "orange";
+        rulingWhy = "Continuation is conditional on fixing ranked failures within a kill window.";
+      } else if(total >= 40){
+        ruling = "Irrational to Continue";
+        rulingPill = "red";
+        rulingWhy = "Execution reality is weak; optimism bias is likely dominating.";
+      } else {
+        ruling = "Terminate";
+        rulingPill = "red";
+        rulingWhy = "Core execution metrics are near floor-level; continuation is irrational.";
+      }
+    }
+
+    // ---- Outcome paths (rough dominance model)
+    // Dominance depends on score + structural + trend + margin.
+    let baselineP = 0.70;
+    let bestcaseP = 0.30;
+
+    if(total >= 78){ baselineP = 0.35; bestcaseP = 0.65; }
+    else if(total >= 58){ baselineP = 0.60; bestcaseP = 0.40; }
+    else if(total >= 40){ baselineP = 0.75; bestcaseP = 0.25; }
+    else { baselineP = 0.85; bestcaseP = 0.15; }
+
+    if(revenueTrend < -0.10){ baselineP += 0.07; bestcaseP -= 0.07; }
+    if(profitMargin > 0.15){ baselineP -= 0.06; bestcaseP += 0.06; }
+    if(structural.status === "Terminal by Design"){ baselineP = 0.90; bestcaseP = 0.10; }
+    baselineP = clamp(baselineP,0.05,0.95);
+    bestcaseP = clamp(bestcaseP,0.05,0.95);
+
+    const dominant = baselineP >= bestcaseP ? "Baseline Decay Path is statistically dominant." : "Best-Case Recovery Path is statistically dominant.";
+
+    // ---- Kill test (window + metrics)
+    // window based on score
+    let windowDays = 90;
+    if(total >= 78) windowDays = 120;
+    else if(total >= 58) windowDays = 90;
+    else if(total >= 40) windowDays = 60;
+    else windowDays = 30;
+
+    // Metrics based on weaknesses
+    const metrics = [];
+
+    // 1) Profit margin target
+    let targetMargin = 0.15;
+    if(total >= 78) targetMargin = 0.12;
+    if(profitMargin < 0.05) metrics.push({m:"Net profit margin", v:`>= ${Math.round(targetMargin*100)}%`});
+    else metrics.push({m:"Net profit margin", v:`Maintain >= ${Math.round(targetMargin*100)}%`});
+
+    // 2) Founder hours target
+    if(H > 45) metrics.push({m:"Founder hours / week", v:"<= 45"});
+    else metrics.push({m:"Founder hours / week", v:"Maintain <= 45"});
+
+    // 3) Revenue trend target
+    if(revenueTrend < 0){
+      metrics.push({m:"Revenue trend", v:"Return to non-declining (flat or up)"});
+    } else {
+      metrics.push({m:"Revenue trend", v:"Maintain non-declining"});
+    }
+
+    // 4) Break-even proximity
+    if(Number.isFinite(breakevenRevenue)){
+      if(R < breakevenRevenue){
+        const target = Math.min(Math.round(breakevenRevenue), Math.round(R*1.25));
+        metrics.push({m:"Break-even progress", v:`Revenue >= ${money(target)}/mo`});
+      } else {
+        metrics.push({m:"Break-even status", v:"Stay above break-even"});
+      }
+    } else {
+      metrics.push({m:"Unit economics", v:"Contribution margin must be positive"});
+    }
+
+    // ---- Data confidence (Tier + internal flags)
+    // base from tier
+    let conf = (tier === "A") ? "HIGH" : (tier === "B") ? "MEDIUM" : "LOW";
+    // degrade if many critical failures
+    const criticalCount = failures.filter(x=>x.sev==="Critical").length;
+    if(criticalCount >= 2 && conf === "HIGH") conf = "MEDIUM";
+    if(criticalCount >= 3 && conf !== "LOW") conf = "LOW";
+
+    return {
+      dims, total,
+      profitMargin, revenueTrend, revenueVolatility,
+      contribMargin, breakevenRevenue,
+      failures, strengths,
+      structural,
+      ruling, rulingPill, rulingWhy,
+      baselineP, bestcaseP, dominant,
+      windowDays, metrics,
+      confidence: conf
+    };
+  }
+
+  function fail(sev, what, why){
+    return { sev, what, why };
+  }
+
+  function rankFailures(failures){
+    const order = { "Critical": 0, "Major": 1, "Moderate": 2 };
+    return failures
+      .slice()
+      .sort((a,b)=> (order[a.sev] - order[b.sev]));
+  }
+
+  // ---------- Render ----------
+  function render(result){
+    document.getElementById("emptyState").classList.add("hidden");
+    document.getElementById("report").classList.remove("hidden");
+    setStep(3);
+
+    // Update header meta
+    document.getElementById("dataConfidence").textContent = result.confidence;
+
+    // Score
+    document.getElementById("scoreNum").textContent = `${Math.round(result.total)}`;
+    document.getElementById("scoreFill").style.width = `${clamp(result.total,0,100)}%`;
+
+    // Percentile (fake heuristic)
+    const percentile = clamp(Math.round(result.total * 0.95), 1, 99);
+
+    // confidence note
+    document.getElementById("scoreMeta").textContent =
+      `Confidence: ${result.confidence} • Percentile (heuristic): ${percentile}th`;
+
+    // Verdict pill
+    const pill = document.getElementById("verdictPill");
+    pill.textContent = result.ruling.toUpperCase();
+    pill.className = "pill " + result.rulingPill;
+    document.getElementById("verdictWhy").textContent = result.rulingWhy;
+
+    // dims
+    document.getElementById("dRevenue").textContent = `${result.dims.revenue}/25`;
+    document.getElementById("dCost").textContent = `${result.dims.cost}/20`;
+    document.getElementById("dOps").textContent = `${result.dims.ops}/20`;
+    document.getElementById("dCustomer").textContent = `${result.dims.customer}/15`;
+    document.getElementById("dBreakeven").textContent = `${result.dims.breakeven}/20`;
+
+    // structural
+    document.getElementById("structStatus").textContent = result.structural.status;
+    document.getElementById("structRule").textContent = result.structural.rule;
+
+    // strengths
+    document.getElementById("strengthSignals").innerHTML =
+      `<ul>${result.strengths.map(s=>`<li>${escapeHtml(s)}</li>`).join("") || "<li>None detected.</li>"}</ul>`;
+
+    // critical failures ranked
+    const ranked = rankFailures(result.failures).slice(0,6); // cap for UI
+    const cf = document.getElementById("criticalFailures");
+    if(ranked.length === 0){
+      cf.innerHTML = `<div class="list"><ul><li>No critical failures detected.</li></ul></div>`;
+    } else {
+      cf.innerHTML = ranked.map(f=>{
+        const cls = f.sev.toLowerCase();
+        return `
+          <div class="rankItem">
+            <div class="rankTag ${cls}">${f.sev}</div>
+            <div class="rankBody">
+              <b>${escapeHtml(f.what)}</b>
+              <div class="why">${escapeHtml(f.why)}</div>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    // outcome paths
+    document.getElementById("baselineProb").textContent = pct(result.baselineP);
+    document.getElementById("bestcaseProb").textContent = pct(result.bestcaseP);
+
+    document.getElementById("baselineText").textContent =
+      buildBaselineText(result);
+
+    document.getElementById("bestcaseText").textContent =
+      buildBestcaseText(result);
+
+    document.getElementById("dominantOutcome").textContent = result.dominant;
+
+    // kill test
+    document.getElementById("killWindow").textContent =
+      `Evaluation window: ${result.windowDays} days • If metrics fail: continuation is classified irrational.`;
+
+    const km = document.getElementById("killMetrics");
+    km.innerHTML = result.metrics.map(x=>`
+      <div class="killMetric">
+        <div class="m">${escapeHtml(x.m)}</div>
+        <div class="v">${escapeHtml(x.v)}</div>
+      </div>
+    `).join("");
+
+    // canonical ruling (exact language)
+    document.getElementById("canonicalRuling").textContent = result.ruling;
+    document.getElementById("canonicalNote").textContent =
+      `Data confidence: ${result.confidence}. This ruling is based on submitted operational reality and internal consistency checks (V1 simulation).`;
+
+  }
+
+  function buildBaselineText(r){
+    const parts = [];
+    if(r.ruling === "Terminate") parts.push("Continuation without structural change is dominated by decay.");
+    if(r.revenueTrend < -0.10) parts.push("Demand trend is negative; revenue likely continues declining.");
+    if(r.profitMargin <= 0) parts.push("Loss profile implies capital depletion over time.");
+    if(r.revenueVolatility > 0.45) parts.push("Revenue volatility increases operational fragility.");
+    if(r.structural.status === "Terminal by Design") parts.push("Model-level constraints prevent stable profitability.");
+    if(parts.length === 0) parts.push("No changes leads to gradual drift; risks accumulate.");
+    return parts.join(" ");
+  }
+
+  function buildBestcaseText(r){
+    const parts = [];
+    if(r.profitMargin < 0.10) parts.push("Cost corrections restore margin and reduce burn.");
+    if(r.revenueTrend < 0) parts.push("Stabilize demand and reverse decline through channel focus.");
+    if(r.contribMargin <= 0) parts.push("Fix unit economics so break-even becomes possible.");
+    if(r.structural.status === "Terminal by Design") parts.push("Recovery requires model change (not mere optimization).");
+    if(parts.length === 0) parts.push("Maintain discipline, reduce dependency risk, and scale with control.");
+    return parts.join(" ");
+  }
+
+  function escapeHtml(str){
+    return String(str)
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  // ---------- Main Action ----------
+  function analyze(){
+    setStep(2);
+    const tier = document.getElementById("evidenceTier").value;
+    setConfidence(tier);
+
+    const payload = {
+      monthlyRevenue: n(document.getElementById("monthlyRevenue").value),
+      monthlyProfit: n(document.getElementById("monthlyProfit").value),
+      fixedCosts: n(document.getElementById("fixedCosts").value),
+      variableCost: n(document.getElementById("variableCost").value),
+      customersPerMonth: n(document.getElementById("customersPerMonth").value),
+      repeatRate: n(document.getElementById("repeatRate").value),
+      acquisitionChannel: document.getElementById("acquisitionChannel").value || "",
+      founderHours: n(document.getElementById("founderHours").value),
+      monthsOperating: n(document.getElementById("monthsOperating").value),
+      dependency: document.getElementById("dependency").value || "",
+      rev1: n(document.getElementById("rev1").value),
+      rev2: n(document.getElementById("rev2").value),
+      rev3: n(document.getElementById("rev3").value),
+      notes: document.getElementById("notes").value || "",
+    };
+
+    const msg = document.getElementById("intakeMsg");
+    msg.innerHTML = "";
+
+    const v = validateInputs(payload);
+
+    // Hard rule: if required evidence missing or invalid -> refuse verdict
+    if(v.errors.length){
+      msg.innerHTML = `
+        <div class="errBox">
+          <b>NO VERDICT ISSUED.</b><br>
+          Missing/invalid required facts:<br>
+          <ul>${v.errors.map(e=>`<li>${escapeHtml(e)}</li>`).join("")}</ul>
+        </div>
+      `;
+      setStep(2);
+      return;
+    }
+
+    // Warnings do not block, but reduce confidence perception
+    if(v.warnings.length){
+      msg.innerHTML = `
+        <div class="warnBox">
+          <b>DATA WARNING:</b> Confirm these potential inconsistencies.<br>
+          <ul>${v.warnings.map(w=>`<li>${escapeHtml(w)}</li>`).join("")}</ul>
+          Verdict will proceed, but confidence may be reduced.
+        </div>
+      `;
+    } else {
+      msg.innerHTML = `<div class="okBox"><b>DATA VALIDATION PASSED.</b> Verdict issued.</div>`;
+    }
+
+    // Score & render
+    const result = scoreVerdict(payload, tier);
+
+    // If warnings exist, degrade confidence by one step
+    if(v.warnings.length){
+      if(result.confidence === "HIGH") result.confidence = "MEDIUM";
+      else if(result.confidence === "MEDIUM") result.confidence = "LOW";
+    }
+
+    render(result);
+  }
+
+  // ---------- Helpers ----------
+  function resetAll(){
+    // reset inputs
+    [
+      "monthlyRevenue","monthlyProfit","fixedCosts","variableCost","customersPerMonth","repeatRate",
+      "acquisitionChannel","founderHours","monthsOperating","dependency","rev1","rev2","rev3","notes"
+    ].forEach(id=>document.getElementById(id).value = "");
+
+    document.getElementById("evidenceTier").value = "C";
+    setConfidence("C");
+
+    document.getElementById("intakeMsg").innerHTML = "";
+    document.getElementById("report").classList.add("hidden");
+    document.getElementById("emptyState").classList.remove("hidden");
+    setStep(1);
+
+    // new case id + time
+    state.caseId = makeCaseId();
+    state.time = nowStamp();
+    document.getElementById("caseId").textContent = state.caseId;
+    document.getElementById("caseTime").textContent = state.time;
+  }
+
+  function fillDemo(){
+    document.getElementById("evidenceTier").value = "B";
+    setConfidence("B");
+
+    document.getElementById("monthlyRevenue").value = "8200";
+    document.getElementById("monthlyProfit").value = "900";
+    document.getElementById("fixedCosts").value = "4100";
+    document.getElementById("variableCost").value = "10";
+    document.getElementById("customersPerMonth").value = "260";
+    document.getElementById("repeatRate").value = "18";
+    document.getElementById("acquisitionChannel").value = "referrals + walk-in";
+    document.getElementById("founderHours").value = "58";
+    document.getElementById("monthsOperating").value = "9";
+    document.getElementById("dependency").value = "Founder does fulfillment + one supplier";
+    document.getElementById("rev1").value = "8200";
+    document.getElementById("rev2").value = "7900";
+    document.getElementById("rev3").value = "7600";
+    document.getElementById("notes").value = "Demo case. Replace with real operational data.";
+  }
+</script>
+<script type="module" src="main.js"></script>
+</body>
+</html>
